@@ -1,15 +1,15 @@
 import React from "react";
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 
-import Navbar from "./components/Navbar";
+import Navbar from "./components/layout/Navbar";
 import VideoChat from "./pages/VideoChat";
 import Messages from "./pages/Messages";
 import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import ProtectedRoute from "./components/ProtectedRoute";
-import ErrorBoundary from "./components/ErrorBoundary";
-import { useAuth } from "./context/AuthContext";
+import ProtectedRoute from "./components/common/ProtectedRoute";
+import ErrorBoundary from "./components/common/ErrorBoundary";
+import { useAuth } from "./hooks/useAuth";
 
 import "./App.css";
 

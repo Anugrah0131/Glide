@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import api from "../api/axiosConfig";
 
 export default function useWebRTC(socket, reconnectToNewPartner) {
@@ -31,7 +31,7 @@ export default function useWebRTC(socket, reconnectToNewPartner) {
     fetchIceServers();
   }, []);
 
-  function createPeerConnection(roomId) {
+  const createPeerConnection = useCallback((roomId) => {
 
     if (peerConnectionRef.current) {
       peerConnectionRef.current.close();
@@ -119,9 +119,9 @@ export default function useWebRTC(socket, reconnectToNewPartner) {
         });
       }
     };
-  }
+  }, [iceServers, reconnectToNewPartner, socket]);
 
-  async function initMedia() {
+  const initMedia = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -157,9 +157,9 @@ export default function useWebRTC(socket, reconnectToNewPartner) {
         setMediaError("Failed to access media devices.");
       }
     }
-  }
+  }, []);
 
-  async function addIceCandidate(candidate) {
+  const addIceCandidate = useCallback(async (candidate) => {
     if (!peerConnectionRef.current) return;
 
     try {
@@ -171,9 +171,10 @@ export default function useWebRTC(socket, reconnectToNewPartner) {
     } catch (err) {
       console.error("ICE candidate error:", err);
     }
-  }
+  }, []);
 
-  async function flushCandidateQueue() {
+  const flushCandidateQueue = useCallback(async () => {
+    if (!peerConnectionRef.current) return;
     for (const candidate of candidateQueue.current) {
       try {
         await peerConnectionRef.current.addIceCandidate(candidate);
@@ -182,9 +183,9 @@ export default function useWebRTC(socket, reconnectToNewPartner) {
       }
     }
     candidateQueue.current = [];
-  }
+  }, []);
 
-  function stopMediaTracks() {
+  const stopMediaTracks = useCallback(() => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
@@ -194,9 +195,9 @@ export default function useWebRTC(socket, reconnectToNewPartner) {
       localVideoRef.current.srcObject = null;
     }
     setIsMediaReady(false);
-  }
+  }, []);
 
-  function cleanupAll() {
+  const cleanupAll = useCallback(() => {
     stopMediaTracks();
 
     if (peerConnectionRef.current) {
@@ -214,7 +215,7 @@ export default function useWebRTC(socket, reconnectToNewPartner) {
 
     candidateQueue.current = [];
     reconnectGuard.current = false;
-  }
+  }, [stopMediaTracks]);
 
   return {
     localVideoRef,
